@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Visualizador interativo dos resultados eleitorais de 2002 na Região Metropolitana de São Paulo, com mapa por local de votação.">
+    <title>Eleições 2002 — RMSP | Visualizador Eleitoral</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Carregando 2.299 locais de votação...</div>
+    </div>
+
+    <div class="app" id="app">
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Expand Tabs (when panels collapsed) -->
+        <div class="expand-tab" id="expandLeft" title="Abrir filtros">&#9654;</div>
+        <div class="expand-tab" id="expandRight" title="Abrir resultados">&#9664;</div>
+
+        <!-- ===== LEFT PANEL: Filtros ===== -->
+        <div class="side side-left" id="panelLeft">
+            <div class="head">
+                <span class="title">Filtros da Visualização</span>
+                <div class="head-actions">
+                    <button class="theme-btn" id="themeToggle" title="Alternar tema">☀</button>
+                    <button class="collapse-btn" id="collapseLeft" title="Recolher painel">◂</button>
+                </div>
+            </div>
+            <div class="body">
+                <!-- Busca -->
+                <div class="section" style="position:relative">
+                    <h3>Buscar local</h3>
+                    <div style="position:relative">
+                        <input
+                            type="search"
+                            id="searchInput"
+                            class="select"
+                            placeholder="Escola, bairro ou município…"
+                            autocomplete="off"
+                            spellcheck="false"
+                            style="width:100%; padding-right:32px"
+                        />
+                        <span id="searchClear" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--muted); font-size:16px; line-height:1; user-select:none">✕</span>
+                    </div>
+                    <div id="searchDropdown" style="
+                        display:none;
+                        position:absolute;
+                        left:0; right:0;
+                        top:calc(100% + 4px);
+                        z-index:9999;
+                        background:var(--surface);
+                        border:1px solid var(--border);
+                        border-radius:var(--radius);
+                        box-shadow:0 8px 24px rgba(0,0,0,0.25);
+                        max-height:320px;
+                        overflow-y:auto;
+                        padding:4px 0;
+                    "></div>
+                </div>
+
+                <!-- Cargo -->
+                <div class="section">
+                    <h3>Cargo</h3>
+                    <select class="select" id="selectCargo">
+                        <option value="presidente_1t">Presidente — 1º Turno</option>
+                        <option value="presidente_2t">Presidente — 2º Turno</option>
+                        <option value="governador_1t">Governador SP — 1º Turno</option>
+                        <option value="governador_2t">Governador SP — 2º Turno</option>
+                        <option value="senador">Senador SP</option>
+                    </select>
+                </div>
+
+                <!-- Município -->
+                <div class="section">
+                    <h3>Município</h3>
+                    <select class="select" id="selectMunicipio">
+                        <option value="">Todos os municípios</option>
+                    </select>
+                </div>
+
+                <!-- Modo de Cor -->
+                <div class="section">
+                    <h3>Modo de cor</h3>
+                    <div class="chip-group">
+                        <button class="chip-button active" data-mode="solid" id="chipSolid">Cor Estática</button>
+                        <button class="chip-button" data-mode="gradient" id="chipGradient">Degradê</button>
+                    </div>
+                </div>
+
+                <!-- Legenda -->
+                <div class="section" id="legendSection">
+                    <h3>Legenda</h3>
+                    <div id="legendItems"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL: Resultados ===== -->
+        <div class="side side-right" id="panelRight">
+            <div class="head">
+                <span class="title" id="rightTitle">Resultados</span>
+                <div class="head-actions">
+                    <button class="collapse-btn" id="collapseRight" title="Recolher painel">▸</button>
+                </div>
+            </div>
+            <div class="body" id="rightBody">
+                <!-- Placeholder -->
+                <div class="placeholder" id="placeholder">
+                    <div class="icon">👆</div>
+                    <p>Clique em um local de votação no mapa para ver os resultados detalhados.</p>
+                </div>
+
+                <!-- Local Info (hidden initially) -->
+                <div id="localInfo" style="display:none">
+                    <div class="local-info" id="localInfoBox">
+                        <h2 id="localName">—</h2>
+                        <div class="meta" id="localMeta"></div>
+                    </div>
+
+                    <!-- Candidate Cards -->
+                    <div class="section" id="candidatesSection">
+                        <h3 id="candidatesTitle">Candidatos</h3>
+                        <div class="grid" id="candidatesGrid"></div>
+                        <button class="btn-ver-mais" id="btnVerMais" style="display:none"></button>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="metrics-grid" id="metricsGrid" style="margin-top:8px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="color-modal-backdrop" id="colorModal" hidden>
+        <div class="color-modal" id="colorModalPanel" role="dialog" aria-modal="true" aria-labelledby="colorModalTitle">
+            <div class="color-modal-head">
+                <div>
+                    <div class="color-modal-kicker">Personalizar cor</div>
+                    <h4 id="colorModalTitle">Cor</h4>
+                </div>
+                <button class="theme-btn" id="closeColorModal" title="Fechar">×</button>
+            </div>
+
+            <div class="color-presets" id="colorPresetGrid"></div>
+
+            <div class="ctrl">
+                <label for="customColorInput">Hex</label>
+                <input class="color-hex-input" id="customColorInput" type="text" maxlength="7" spellcheck="false" placeholder="#30306C">
+            </div>
+
+            <div class="color-modal-actions">
+                <button class="chip-button" id="resetColorButton" type="button">Cor padrao</button>
+                <button class="apply-color-btn" id="applyColorButton" type="button">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/candidates.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
