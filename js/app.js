@@ -187,6 +187,7 @@
             searchIndex = null; // reset search index with fresh data
 
             populateMunicipios();
+            populateVencidosCandidates();
             updateHeader();
             renderMarkers({ refit: true });
             syncDetailPanel();
