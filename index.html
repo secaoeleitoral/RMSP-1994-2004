@@ -128,11 +128,13 @@
                         <div id="perfGradientContainer" style="margin-top:12px">
                             <div style="position: relative; height: 16px;">
                                 <div class="gradient-bar" id="gradientBar" style="position: absolute; width: 100%; top: 0; left: 0;"></div>
-                                <input type="range" id="perfFilterSlider" class="perf-slider" min="0" max="100" step="0.1" value="0">
+                                <div class="range-selection" id="rangeSelection"></div>
+                                <input type="range" id="perfFilterSlider" class="perf-slider perf-slider-min" min="0" max="100" step="0.1" value="0">
+                                <input type="range" id="perfFilterSliderMax" class="perf-slider perf-slider-max" min="0" max="100" step="0.1" value="100">
                             </div>
                             <div class="gradient-labels" style="position: relative;">
                                 <span class="gradient-label-min" id="gradientMin">▼ 0,00%</span>
-                                <span id="perfFilterLabel" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s;">Filtro: &ge; 0,00%</span>
+                                <span id="perfFilterLabel" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s;"></span>
                                 <span class="gradient-label-max" id="gradientMax">0,00% ▲</span>
                             </div>
                             <div class="perf-summary" id="perfSummary">Média: 0,00% · 0 locais</div>

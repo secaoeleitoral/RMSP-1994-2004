@@ -31,6 +31,7 @@
         vizMode: 'vencedor',
         perfCandidateCode: null,
         perfFilterPct: 0,
+        perfFilterMaxPct: 100,
         perfStats: null,
         colorOverrides: getInitialColorOverrides(),
         activeColorFamily: null,
@@ -97,6 +98,8 @@
         gradientMax: document.getElementById('gradientMax'),
         perfSummary: document.getElementById('perfSummary'),
         perfFilterSlider: document.getElementById('perfFilterSlider'),
+        perfFilterSliderMax: document.getElementById('perfFilterSliderMax'),
+        rangeSelection: document.getElementById('rangeSelection'),
         perfFilterLabel: document.getElementById('perfFilterLabel')
     };
 
@@ -466,12 +469,12 @@
                 return;
             }
 
-            if (state.vizMode === 'desempenho' && state.perfCandidateCode && state.perfFilterPct > 0) {
+            if (state.vizMode === 'desempenho' && state.perfCandidateCode && (state.perfFilterPct > 0 || state.perfFilterMaxPct < 100)) {
                 const entry = summary.entries.find((e) => e.code === state.perfCandidateCode);
                 const candidateVotes = entry ? entry.votos : 0;
                 const pct = summary.validTotal > 0 ? (candidateVotes / summary.validTotal) * 100 : 0;
                 
-                if (pct < state.perfFilterPct) {
+                if (pct < state.perfFilterPct || pct > state.perfFilterMaxPct) {
                     return;
                 }
             }
@@ -936,7 +939,7 @@
                     max = pct;
                 }
 
-                if (pct >= state.perfFilterPct) {
+                if (pct >= state.perfFilterPct && pct <= state.perfFilterMaxPct) {
                     sum += pct;
                     count++;
                 }
@@ -966,6 +969,10 @@
 
             if (dom.perfFilterSlider) {
                 dom.perfFilterSlider.max = 0;
+            }
+
+            if (dom.perfFilterSliderMax) {
+                dom.perfFilterSliderMax.max = 0;
             }
 
             if (dom.perfFilterLabel) {
@@ -999,22 +1006,42 @@
             dom.perfSummary.textContent = `Média: ${formatPercent(stats.avg)} \u00B7 ${formatNumber(stats.count)} locais`;
         }
 
-        if (dom.perfFilterSlider) {
+        if (dom.perfFilterSlider && dom.perfFilterSliderMax) {
             if (stats.max > 0) {
-                dom.perfFilterSlider.max = stats.max.toFixed(2);
+                const maxVal = stats.max.toFixed(2);
+                dom.perfFilterSlider.max = maxVal;
+                dom.perfFilterSliderMax.max = maxVal;
+                // Se o max ainda está em 100 (padrão) e o max real é menor, ajusta
+                if (parseFloat(dom.perfFilterSliderMax.value) > parseFloat(maxVal)) {
+                    dom.perfFilterSliderMax.value = maxVal;
+                    state.perfFilterMaxPct = parseFloat(maxVal);
+                }
             }
+            updateRangeSelection();
         }
 
         if (dom.perfFilterLabel) {
-            if (state.perfFilterPct > 0) {
-                dom.perfFilterLabel.textContent = `Filtro: \u2265 ${formatPercent(state.perfFilterPct)}`;
+            const isFiltered = state.perfFilterPct > 0 || state.perfFilterMaxPct < parseFloat(dom.perfFilterSliderMax?.max || 100);
+            if (isFiltered) {
+                dom.perfFilterLabel.textContent = `${formatPercent(state.perfFilterPct)} – ${formatPercent(state.perfFilterMaxPct)}`;
                 dom.perfFilterLabel.style.opacity = '1';
                 dom.perfFilterLabel.style.color = candidateInfo.cor;
             } else {
-                dom.perfFilterLabel.textContent = `Filtro: \u2265 0,00%`;
                 dom.perfFilterLabel.style.opacity = '0';
             }
         }
+    }
+
+    function updateRangeSelection() {
+        if (!dom.perfFilterSlider || !dom.perfFilterSliderMax || !dom.rangeSelection) return;
+        const min = parseFloat(dom.perfFilterSlider.min) || 0;
+        const max = parseFloat(dom.perfFilterSlider.max) || 100;
+        const valMin = parseFloat(dom.perfFilterSlider.value) || 0;
+        const valMax = parseFloat(dom.perfFilterSliderMax.value) || max;
+        const leftPct = ((valMin - min) / (max - min)) * 100;
+        const rightPct = ((valMax - min) / (max - min)) * 100;
+        dom.rangeSelection.style.left = leftPct + '%';
+        dom.rangeSelection.style.width = (rightPct - leftPct) + '%';
     }
 
     function switchVizMode(mode) {
@@ -1687,7 +1714,10 @@
             if (state.currentCargo !== combined) {
                 state.currentCargo = combined;
                 state.perfFilterPct = 0;
+                state.perfFilterMaxPct = 100;
                 if (dom.perfFilterSlider) dom.perfFilterSlider.value = 0;
+                if (dom.perfFilterSliderMax) { dom.perfFilterSliderMax.value = dom.perfFilterSliderMax.max || 100; }
+                updateRangeSelection();
                 closeColorPicker();
                 populatePerfCandidates();
                 populateVencidosCandidates();
@@ -1737,7 +1767,10 @@
                 state.currentBairro = null;
                 state.currentLocalId = null;
                 state.perfFilterPct = 0;
+                state.perfFilterMaxPct = 100;
                 if (dom.perfFilterSlider) dom.perfFilterSlider.value = 0;
+                if (dom.perfFilterSliderMax) { dom.perfFilterSliderMax.value = dom.perfFilterSliderMax.max || 100; }
+                updateRangeSelection();
                 
                 if (dom.searchInput) {
                     dom.searchInput.value = '';
@@ -1805,7 +1838,10 @@
             dom.selectPerfCandidate.addEventListener('change', () => {
                 state.perfCandidateCode = dom.selectPerfCandidate.value;
                 state.perfFilterPct = 0;
+                state.perfFilterMaxPct = 100;
                 if (dom.perfFilterSlider) dom.perfFilterSlider.value = 0;
+                if (dom.perfFilterSliderMax) { dom.perfFilterSliderMax.value = dom.perfFilterSliderMax.max || 100; }
+                updateRangeSelection();
 
                 if (state.vizMode === 'desempenho') {
                     renderMarkers();
@@ -1815,7 +1851,28 @@
 
         if (dom.perfFilterSlider) {
             dom.perfFilterSlider.addEventListener('input', () => {
-                state.perfFilterPct = parseFloat(dom.perfFilterSlider.value) || 0;
+                let minVal = parseFloat(dom.perfFilterSlider.value) || 0;
+                let maxVal = parseFloat(dom.perfFilterSliderMax?.value) || 100;
+                if (minVal > maxVal) {
+                    minVal = maxVal;
+                    dom.perfFilterSlider.value = minVal;
+                }
+                state.perfFilterPct = minVal;
+                updateRangeSelection();
+                renderMarkers();
+            });
+        }
+
+        if (dom.perfFilterSliderMax) {
+            dom.perfFilterSliderMax.addEventListener('input', () => {
+                let maxVal = parseFloat(dom.perfFilterSliderMax.value) || 100;
+                let minVal = parseFloat(dom.perfFilterSlider?.value) || 0;
+                if (maxVal < minVal) {
+                    maxVal = minVal;
+                    dom.perfFilterSliderMax.value = maxVal;
+                }
+                state.perfFilterMaxPct = maxVal;
+                updateRangeSelection();
                 renderMarkers();
             });
         }

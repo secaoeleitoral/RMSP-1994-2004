@@ -694,8 +694,11 @@ body {
     background: transparent;
     margin: 0;
     outline: none;
-    z-index: 2;
+    pointer-events: none;
 }
+
+.perf-slider-min { z-index: 3; }
+.perf-slider-max { z-index: 4; }
 
 .perf-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -704,6 +707,7 @@ body {
     background: var(--text);
     border-radius: 2px;
     cursor: grab;
+    pointer-events: all;
 }
 
 .perf-slider::-webkit-slider-thumb:active {
@@ -717,10 +721,21 @@ body {
     border-radius: 2px;
     border: none;
     cursor: grab;
+    pointer-events: all;
 }
 
 .perf-slider::-moz-range-thumb:active {
     cursor: grabbing;
+}
+
+.range-selection {
+    position: absolute;
+    top: 5px;
+    height: 6px;
+    background: rgba(255,255,255,0.25);
+    z-index: 1;
+    border-radius: 2px;
+    pointer-events: none;
 }
 
 .gradient-labels {
