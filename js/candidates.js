@@ -737,6 +737,74 @@ const CANDIDATES = withColors({
     }
 });
 
+const CANDIDATES_1998 = withColors({
+    presidente_1t: {
+        label: 'Presidente - 1º Turno (1998)',
+        candidates: {
+            '13': { nome: 'Lula',               partido: 'PT'    },
+            '16': { nome: 'Zé Maria',            partido: 'PSTU'  },
+            '19': { nome: 'Candidato PTN',        partido: 'PTN'   },
+            '20': { nome: 'Candidato PSC',        partido: 'PSC'   },
+            '23': { nome: 'Ciro Gomes',           partido: 'PPS'   },
+            '27': { nome: 'Eymael',               partido: 'PSDC'  },
+            '31': { nome: 'Vasco Azevedo Neto',   partido: 'PSN'   },
+            '33': { nome: 'Ivan Frota',           partido: 'PMN'   },
+            '43': { nome: 'Alfredo Sirkis',       partido: 'PV'    },
+            '45': { nome: 'FHC',                  partido: 'PSDB'  },
+            '56': { nome: 'Enéas',                partido: 'PRONA' },
+            '70': { nome: 'Candidato PTdoB',      partido: 'NOVO_SD' },
+            '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
+            '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
+        }
+    },
+    governador_1t: {
+        label: 'Governador SP - 1º Turno (1998)',
+        candidates: {
+            '11': { nome: 'Paulo Maluf',       partido: 'PPB'   },
+            '12': { nome: 'Francisco Rossi',   partido: 'PDT'   },
+            '13': { nome: 'Marta Suplicy',     partido: 'PT'    },
+            '15': { nome: 'Quércia',           partido: 'PMDB'  },
+            '16': { nome: 'Antonio Ferreira',  partido: 'PSTU'  },
+            '20': { nome: 'Falanga',           partido: 'PSC'   },
+            '27': { nome: 'João Manuel',      partido: 'PSDC'  },
+            '28': { nome: 'Levy Fidelix',      partido: 'PRTB'  },
+            '45': { nome: 'Mário Covas',      partido: 'PSDB'  },
+            '56': { nome: 'Constantino Cury',  partido: 'PRONA' },
+            '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
+            '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
+        }
+    },
+    governador_2t: {
+        label: 'Governador SP - 2º Turno (1998)',
+        candidates: {
+            '11': { nome: 'Paulo Maluf', partido: 'PPB'  },
+            '45': { nome: 'Mário Covas', partido: 'PSDB' },
+            '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
+            '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
+        }
+    },
+    senador_1t: {
+        label: 'Senador SP - 1º Turno (1998)',
+        candidates: {
+            '11': { nome: 'Oscar do Basquete',     partido: 'PPB'   },
+            '13': { nome: 'Eduardo Suplicy',       partido: 'PT'    },
+            '14': { nome: 'João Leite Neto',       partido: 'PTB'   },
+            '15': { nome: 'Jooji Hato',            partido: 'PMDB'  },
+            '16': { nome: 'Mauro Puerro',          partido: 'PSTU'  },
+            '20': { nome: 'Kayo Fukuda',           partido: 'PSC'   },
+            '27': { nome: 'Osmar Simionatto',      partido: 'PSDC'  },
+            '28': { nome: 'Aguiar Filho',          partido: 'PRTB'  },
+            '30': { nome: 'Napoleão Alves',        partido: 'PGT'   },
+            '40': { nome: 'Almino Affonso',        partido: 'PSB'   },
+            '43': { nome: 'Domingos Fernandes',    partido: 'PV'    },
+            '56': { nome: 'Paulo Corrêa',          partido: 'PRONA' },
+            '70': { nome: 'Leônidas R. de Oliveira', partido: 'NOVO_SD' },
+            '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
+            '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
+        }
+    }
+});
+
 function applyColorOverrides(overrides = {}) {
     Object.values(CANDIDATES).forEach((office) => {
         Object.values(office.candidates).forEach((candidate) => {
@@ -1491,7 +1559,7 @@ const MUNICIPIOS_2000 = {
             "partido": "PRTB"
         }
     },
-    "EMBU": {
+    "EMBU DAS ARTES": {
         "14": {
             "nome": "Milton Do Faixa Azul",
             "partido": "PTB"
@@ -1535,6 +1603,42 @@ const MUNICIPIOS_2000 = {
         "25": {
             "nome": "Nenê Simão",
             "partido": "PFL"
+        }
+    },
+    "FRANCISCO MORATO": {
+        "43": {
+            "nome": "Lia",
+            "partido": "PV"
+        },
+        "45": {
+            "nome": "Zezinho Bressane",
+            "partido": "PSDB"
+        },
+        "29": {
+            "nome": "Aninha",
+            "partido": "PCO"
+        },
+        "25": {
+            "nome": "Dr. Claudino",
+            "partido": "PFL"
+        },
+        "44": {
+            "nome": "Rubens",
+            "partido": "PRP"
+        }
+    },
+    "SAO LOURENCO DA SERRA": {
+        "25": {
+            "nome": "Claudio Pança",
+            "partido": "PFL"
+        },
+        "22": {
+            "nome": "Hélio Camargo",
+            "partido": "PL"
+        },
+        "45": {
+            "nome": "Capitão Lener",
+            "partido": "PSDB"
         }
     }
 };

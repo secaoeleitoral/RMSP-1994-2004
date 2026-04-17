@@ -52,6 +52,10 @@
         searchInput: document.getElementById('searchInput'),
         searchClear: document.getElementById('searchClear'),
         searchDropdown: document.getElementById('searchDropdown'),
+        bairroInput: document.getElementById('bairroInput'),
+        bairroClear: document.getElementById('bairroClear'),
+        bairroDropdown: document.getElementById('bairroDropdown'),
+        btnSomarBairro: document.getElementById('btnSomarBairro'),
         loadingText: document.querySelector('.loading-text'),
         panelLeft: document.getElementById('panelLeft'),
         panelRight: document.getElementById('panelRight'),
@@ -85,6 +89,7 @@
         btnVerMais: document.getElementById('btnVerMais'),
         chipYear2002: document.getElementById('chipYear2002'),
         chipYear2000: document.getElementById('chipYear2000'),
+        chipYear1998: document.getElementById('chipYear1998'),
         chipVencedor: document.getElementById('chipVencedor'),
         chipVencidos: document.getElementById('chipVencidos'),
         chipDesempenho: document.getElementById('chipDesempenho'),
@@ -121,7 +126,7 @@
     }
 
     function persistColorOverrides() {
-        // Removido: cores customizadas agora resetam no reload da página.
+        // Removido: cores customizadas agora resetam no reload da pÃ¡gina.
     }
 
     function applyColorOverridesFromState() {
@@ -176,10 +181,18 @@
         }).addTo(state.map);
     }
 
+    function getCandidates() {
+        if (state.currentYear === '1998' && typeof CANDIDATES_1998 !== 'undefined') {
+            return CANDIDATES_1998;
+        }
+        return CANDIDATES;
+    }
+
     async function loadData() {
         if (dom.loading) dom.loading.classList.remove('hidden');
         try {
-            const fileName = state.currentYear === '2000' ? 'data/EL2000_web.geojson' : 'data/stations.geojson';
+            const fileMap = { '2000': 'data/EL2000_web.geojson', '1998': 'data/EL1998_web.geojson' };
+            const fileName = fileMap[state.currentYear] || 'data/stations.geojson';
             const response = await fetch(fileName);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -479,6 +492,13 @@
                 }
             }
 
+            if (state.vizMode === 'desempenho' && state.perfCandidateCode && state.currentYear === '2000') {
+                const entry = summary.entries.find((e) => e.code === state.perfCandidateCode);
+                if (!entry || entry.isInvalid) {
+                    return;
+                }
+            }
+
             const [lon, lat] = feature.geometry.coordinates;
             const marker = L.circleMarker([lat, lon], {
                 ...buildMarkerStyle(summary, false),
@@ -558,7 +578,7 @@
 
             const range = stats.max - stats.min;
             const ratio = range > 0 ? Math.max(0, Math.min(1, (pct - stats.min) / range)) : 0.5;
-            const candidateInfo = CANDIDATES[state.currentCargo]?.candidates[state.perfCandidateCode];
+            const candidateInfo = getCandidates()[state.currentCargo]?.candidates[state.perfCandidateCode];
 
             if (!candidateInfo) {
                 return '#737373';
@@ -661,7 +681,7 @@
     }
 
     function summarizeFeature(feature) {
-        const cargoData = CANDIDATES[state.currentCargo] || { candidates: {} };
+        const cargoData = getCandidates()[state.currentCargo] || { candidates: {} };
         const votes = feature.properties[state.currentCargo] || {};
 
         const entries = Object.entries(votes)
@@ -744,7 +764,7 @@
             return;
         }
 
-        const cargoData = CANDIDATES[state.currentCargo];
+        const cargoData = getCandidates()[state.currentCargo];
 
         if (!cargoData) {
             return;
@@ -762,18 +782,13 @@
                     .filter(([code]) => localStr[code])
                     .map(([code, info]) => [code, { ...info, nome: localStr[code].nome }]);
             } else {
+                const allMuns = typeof MUNICIPIOS_2000 !== 'undefined'
+                    ? Object.keys(MUNICIPIOS_2000).filter((k) => k !== 'NM_UE')
+                    : [];
                 entries = entries
                     .filter(([code]) => {
-                        let hasData = false;
-                        if (typeof MUNICIPIOS_2000 !== 'undefined') {
-                            for (const mun in MUNICIPIOS_2000) {
-                                if (MUNICIPIOS_2000[mun] && MUNICIPIOS_2000[mun][code]) {
-                                    hasData = true;
-                                    break;
-                                }
-                            }
-                        }
-                        return hasData;
+                        if (!allMuns.length) return false;
+                        return allMuns.some((mun) => MUNICIPIOS_2000[mun] && MUNICIPIOS_2000[mun][code]);
                     })
                     .map(([code, info]) => [code, { ...info, nome: `Partido ${info.partido}` }]);
             }
@@ -786,7 +801,10 @@
         entries.forEach(([code, info]) => {
             const option = document.createElement('option');
             option.value = code;
-            option.textContent = `${info.nome.toUpperCase()} (${info.partido || 'Sem partido'})`;
+            const showParty = info.partido && !info.nome.toUpperCase().includes(info.partido.toUpperCase());
+            option.textContent = showParty
+                ? `${info.nome.toUpperCase()} (${info.partido})`
+                : info.nome.toUpperCase();
             dom.selectPerfCandidate.appendChild(option);
         });
 
@@ -810,7 +828,7 @@
             return;
         }
 
-        const cargoData = CANDIDATES[state.currentCargo];
+        const cargoData = getCandidates()[state.currentCargo];
 
         if (!cargoData) {
             return;
@@ -926,6 +944,11 @@
         visibleFeatures.forEach((feature) => {
             const summary = summarizeFeature(feature);
             const entry = summary.entries.find((e) => e.code === state.perfCandidateCode);
+
+            if (!entry || entry.isInvalid) {
+                return;
+            }
+
             const candidateVotes = entry ? entry.votos : 0;
 
             if (summary.validTotal > 0) {
@@ -956,7 +979,7 @@
 
     function updatePerformanceView() {
         const stats = state.perfStats;
-        const candidateInfo = CANDIDATES[state.currentCargo]?.candidates[state.perfCandidateCode];
+        const candidateInfo = getCandidates()[state.currentCargo]?.candidates[state.perfCandidateCode];
 
         if (!stats || !candidateInfo) {
             if (dom.gradientBar) {
@@ -964,7 +987,7 @@
             }
 
             if (dom.perfSummary) {
-                dom.perfSummary.textContent = 'Sem dados disponíveis';
+                dom.perfSummary.textContent = 'Sem dados disponÃ­veis';
             }
 
             if (dom.perfFilterSlider) {
@@ -1003,7 +1026,7 @@
         }
 
         if (dom.perfSummary) {
-            dom.perfSummary.textContent = `Média: ${formatPercent(stats.avg)} \u00B7 ${formatNumber(stats.count)} locais`;
+            dom.perfSummary.textContent = `MÃ©dia: ${formatPercent(stats.avg)} \u00B7 ${formatNumber(stats.count)} locais`;
         }
 
         if (dom.perfFilterSlider && dom.perfFilterSliderMax) {
@@ -1011,7 +1034,7 @@
                 const maxVal = stats.max.toFixed(2);
                 dom.perfFilterSlider.max = maxVal;
                 dom.perfFilterSliderMax.max = maxVal;
-                // Se o max ainda está em 100 (padrão) e o max real é menor, ajusta
+                // Se o max ainda estÃ¡ em 100 (padrÃ£o) e o max real Ã© menor, ajusta
                 if (parseFloat(dom.perfFilterSliderMax.value) > parseFloat(maxVal)) {
                     dom.perfFilterSliderMax.value = maxVal;
                     state.perfFilterMaxPct = parseFloat(maxVal);
@@ -1023,7 +1046,7 @@
         if (dom.perfFilterLabel) {
             const isFiltered = state.perfFilterPct > 0 || state.perfFilterMaxPct < parseFloat(dom.perfFilterSliderMax?.max || 100);
             if (isFiltered) {
-                dom.perfFilterLabel.textContent = `${formatPercent(state.perfFilterPct)} – ${formatPercent(state.perfFilterMaxPct)}`;
+                dom.perfFilterLabel.textContent = `${formatPercent(state.perfFilterPct)} â€“ ${formatPercent(state.perfFilterMaxPct)}`;
                 dom.perfFilterLabel.style.opacity = '1';
                 dom.perfFilterLabel.style.color = candidateInfo.cor;
             } else {
@@ -1153,7 +1176,7 @@
     function renderDetail(feature) {
         const summary = summarizeFeature(feature);
         const props = feature.properties;
-        const cargoLabel = CANDIDATES[state.currentCargo]?.label || 'Cargo';
+        const cargoLabel = getCandidates()[state.currentCargo]?.label || 'Cargo';
 
         updateHeader();
 
@@ -1209,10 +1232,6 @@
             { label: 'Votos validos', value: formatNumber(summary.validTotal) },
             { label: `Brancos (${formatPercent(blankPct)})`, value: `${formatNumber(blankVotes)} votos` },
             { label: `Nulos (${formatPercent(nullPct)})`, value: `${formatNumber(nullVotes)} votos` },
-            {
-                label: 'Lideranca',
-                value: summary.winner ? `${getCandidateDisplayName(summary.winner.info, props.municipio)} (${formatPercent(summary.winnerPct)})` : 'Sem votos'
-            },
             {
                 label: 'Margem',
                 value: summary.winner
@@ -1319,7 +1338,7 @@
             return;
         }
 
-        const cargoLabel = CANDIDATES[state.currentCargo]?.label || 'Resultados';
+        const cargoLabel = getCandidates()[state.currentCargo]?.label || 'Resultados';
         const municipioLabel = state.currentMunicipio
             ? ` - ${titleCase(state.currentMunicipio)}`
             : '';
@@ -1329,8 +1348,8 @@
 
     function buildTooltipHtml(feature, summary) {
         if (state.vizMode === 'desempenho' && state.perfCandidateCode) {
-            const candidateInfo = CANDIDATES[state.currentCargo]?.candidates[state.perfCandidateCode];
             const entry = summary.entries.find((e) => e.code === state.perfCandidateCode);
+            const candidateInfo = entry ? entry.info : getCandidates()[state.currentCargo]?.candidates[state.perfCandidateCode];
             const candidateVotes = entry ? entry.votos : 0;
             const pct = summary.validTotal > 0 ? (candidateVotes / summary.validTotal) * 100 : 0;
             const fillColor = getMarkerFillColor(summary);
@@ -1397,66 +1416,64 @@
         return searchIndex;
     }
 
-    function runSearch(query) {
+    function runLocalSearch(query) {
         const q = normalizeSearch(query);
         if (q.length < 2) return [];
 
         const index = getSearchIndex();
-        const municipios = new Map();
-        const distritos = new Map();
         const features = [];
 
+        const munFilter = state.currentMunicipio || null;
+
         index.forEach((entry) => {
-            const inNome      = entry.nome.includes(q);
-            const inDistrito  = entry.distrito.includes(q);
-            const inMunicipio = entry.municipio.includes(q);
-            const inEndereco  = entry.endereco.includes(q);
+            if (munFilter && entry.municipio !== munFilter) return;
 
-            if (inMunicipio) {
-                const key = `MUN||${entry.municipioRaw}`;
-                if (!municipios.has(key)) {
-                    municipios.set(key, {
-                        tipo: 'município',
-                        label: titleCase(entry.municipioRaw),
-                        sub: 'Município — todos os locais',
-                        municipio: entry.municipioRaw,
-                        distrito: null
-                    });
-                }
-            }
-
-            if (inDistrito) {
-                const key = `${entry.municipioRaw}||${entry.distritoRaw}`;
-                if (!distritos.has(key)) {
-                    distritos.set(key, {
-                        tipo: 'bairro',
-                        label: titleCase(entry.distritoRaw),
-                        sub: titleCase(entry.municipioRaw),
-                        municipio: entry.municipioRaw,
-                        distrito: entry.distritoRaw
-                    });
-                }
-            }
+            const inNome     = entry.nome.includes(q);
+            const inEndereco = entry.endereco.includes(q);
 
             if (inNome || inEndereco) {
                 features.push({
                     tipo: 'local',
                     label: titleCase(entry.nomeRaw),
-                    sub: `${titleCase(entry.distritoRaw)} · ${titleCase(entry.municipioRaw)}`,
+                    sub: `${titleCase(entry.distritoRaw)} Â· ${titleCase(entry.municipioRaw)}`,
                     endereco: `${titleCase(entry.enderecoRaw)}, ${titleCase(entry.municipioRaw)}`,
                     feature: entry.feature
                 });
             }
         });
 
-        const munItems  = [...municipios.values()].slice(0, 3);
-        const distItems = [...distritos.values()].slice(0, 4);
-        const featItems = features.slice(0, 14 - munItems.length - distItems.length);
-        return [...munItems, ...distItems, ...featItems];
+        return features.slice(0, 12);
     }
 
-    function renderSearchDropdown(items) {
-        const dd = dom.searchDropdown;
+    function runBairroSearch(query) {
+        const q = normalizeSearch(query);
+        if (q.length < 2) return [];
+
+        const index = getSearchIndex();
+        const distritos = new Map();
+
+        const munFilter = state.currentMunicipio || null;
+
+        index.forEach((entry) => {
+            if (munFilter && entry.municipio !== munFilter) return;
+            if (!entry.distrito.includes(q)) return;
+
+            const key = `${entry.municipioRaw}||${entry.distritoRaw}`;
+            if (!distritos.has(key)) {
+                distritos.set(key, {
+                    tipo: 'bairro',
+                    label: titleCase(entry.distritoRaw),
+                    sub: titleCase(entry.municipioRaw),
+                    municipio: entry.municipioRaw,
+                    distrito: entry.distritoRaw
+                });
+            }
+        });
+
+        return [...distritos.values()].slice(0, 12);
+    }
+
+    function renderSearchDropdown(items, dd) {
         if (!dd) return;
 
         dd.innerHTML = '';
@@ -1470,17 +1487,7 @@
             return;
         }
 
-        let lastTipo = null;
-
         items.forEach((item) => {
-            // Separator between districts and locals
-            if (lastTipo !== null && item.tipo !== lastTipo) {
-                const sep = document.createElement('div');
-                sep.style.cssText = 'height:1px; background:var(--border); margin:4px 0;';
-                dd.appendChild(sep);
-            }
-            lastTipo = item.tipo;
-
             const row = document.createElement('button');
             row.type = 'button';
             row.style.cssText = `
@@ -1493,7 +1500,6 @@
             row.addEventListener('mouseenter', () => { row.style.background = 'var(--surface-2)'; });
             row.addEventListener('mouseleave', () => { row.style.background = 'none'; });
 
-            // Text
             const texts = document.createElement('div');
             texts.style.cssText = 'flex:1; min-width:0;';
 
@@ -1507,18 +1513,8 @@
                 ? item.endereco
                 : item.sub;
 
-            // Badge
-            const badge = document.createElement('span');
-            badge.style.cssText = `
-                flex-shrink:0; font-size:10px; font-weight:600; padding:2px 6px;
-                border-radius:10px; text-transform:uppercase; letter-spacing:0.04em;
-                background:var(--surface-2); color:var(--muted);
-                border:1px solid var(--border);
-            `;
-            badge.textContent = item.tipo;
-
             texts.append(main, secondary);
-            row.append(texts, badge);
+            row.appendChild(texts);
 
             row.addEventListener('click', () => {
                 handleSearchSelect(item);
@@ -1531,7 +1527,7 @@
     }
 
     function handleSearchSelect(item) {
-        closeSearchDropdown();
+        closeAllDropdowns();
 
         if (item.tipo === 'local') {
             const feature = item.feature;
@@ -1555,6 +1551,12 @@
             if (dom.searchInput) {
                 dom.searchInput.value = item.label;
             }
+            if (dom.searchClear) dom.searchClear.style.display = 'block';
+
+            // Clear bairro field
+            if (dom.bairroInput) dom.bairroInput.value = '';
+            if (dom.bairroClear) dom.bairroClear.style.display = 'none';
+            if (dom.btnSomarBairro) dom.btnSomarBairro.style.display = 'none';
 
         } else if (item.tipo === 'bairro') {
             state.currentLocalId = null;
@@ -1564,26 +1566,21 @@
             renderMarkers({ refit: true });
             syncDetailPanel();
 
-            if (dom.searchInput) {
-                dom.searchInput.value = `${item.label}, ${titleCase(item.municipio)}`;
+            if (dom.bairroInput) {
+                dom.bairroInput.value = `${item.label}, ${titleCase(item.municipio)}`;
             }
+            if (dom.bairroClear) dom.bairroClear.style.display = 'block';
+            if (dom.btnSomarBairro) dom.btnSomarBairro.style.display = 'inline-block';
 
-        } else if (item.tipo === 'município') {
-            state.currentLocalId = null;
-            state.currentBairro = null;
-            applyMunicipioChange(item.municipio);
-
-            renderMarkers({ refit: true });
-            syncDetailPanel();
-
-            if (dom.searchInput) {
-                dom.searchInput.value = item.label;
-            }
+            // Clear local field
+            if (dom.searchInput) dom.searchInput.value = '';
+            if (dom.searchClear) dom.searchClear.style.display = 'none';
         }
+    }
 
-        if (dom.searchClear) {
-            dom.searchClear.style.display = 'block';
-        }
+    function closeAllDropdowns() {
+        if (dom.searchDropdown) dom.searchDropdown.style.display = 'none';
+        if (dom.bairroDropdown) dom.bairroDropdown.style.display = 'none';
     }
 
     function closeSearchDropdown() {
@@ -1592,33 +1589,31 @@
         }
     }
 
-    function setupSearch() {
-        const input = dom.searchInput;
-        const clear = dom.searchClear;
+    function setupSearchField(input, clear, dropdown, searchFn) {
         if (!input) return;
 
         let debounceTimer = null;
 
         input.addEventListener('input', () => {
             const val = input.value;
-            clear.style.display = val ? 'block' : 'none';
+            if (clear) clear.style.display = val ? 'block' : 'none';
 
             clearTimeout(debounceTimer);
             if (val.trim().length < 2) {
-                closeSearchDropdown();
+                if (dropdown) dropdown.style.display = 'none';
                 return;
             }
 
             debounceTimer = setTimeout(() => {
-                const results = runSearch(val);
-                renderSearchDropdown(results);
+                const results = searchFn(val);
+                renderSearchDropdown(results, dropdown);
             }, 180);
         });
 
         input.addEventListener('focus', () => {
             if (input.value.trim().length >= 2) {
-                const results = runSearch(input.value);
-                renderSearchDropdown(results);
+                const results = searchFn(input.value);
+                renderSearchDropdown(results, dropdown);
             }
         });
 
@@ -1626,9 +1621,9 @@
             clear.addEventListener('click', () => {
                 input.value = '';
                 clear.style.display = 'none';
-                closeSearchDropdown();
+                if (dropdown) dropdown.style.display = 'none';
                 input.focus();
-                
+
                 state.currentBairro = null;
                 state.currentLocalId = null;
                 if (state.geojson) {
@@ -1637,20 +1632,17 @@
             });
         }
 
-        // Close on outside click
         document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !dom.searchDropdown?.contains(e.target)) {
-                closeSearchDropdown();
+            if (!input.contains(e.target) && !dropdown?.contains(e.target)) {
+                if (dropdown) dropdown.style.display = 'none';
             }
         });
 
-        // Keyboard navigation
         input.addEventListener('keydown', (e) => {
-            const dd = dom.searchDropdown;
-            if (!dd || dd.style.display === 'none') return;
+            if (!dropdown || dropdown.style.display === 'none') return;
 
-            const buttons = [...dd.querySelectorAll('button')];
-            const focused = dd.querySelector('button:focus');
+            const buttons = [...dropdown.querySelectorAll('button')];
+            const focused = dropdown.querySelector('button:focus');
             const idx = focused ? buttons.indexOf(focused) : -1;
 
             if (e.key === 'ArrowDown') {
@@ -1662,26 +1654,125 @@
                 const prev = buttons[idx - 1] || buttons[buttons.length - 1];
                 prev?.focus();
             } else if (e.key === 'Escape') {
-                closeSearchDropdown();
+                if (dropdown) dropdown.style.display = 'none';
                 input.blur();
             }
         });
+    }
+
+    function setupSearch() {
+        setupSearchField(dom.bairroInput, dom.bairroClear, dom.bairroDropdown, runBairroSearch);
+        setupSearchField(dom.searchInput, dom.searchClear, dom.searchDropdown, runLocalSearch);
+
+        // Hide SOMAR button when bairro is cleared
+        const origBairroClearClick = dom.bairroClear;
+        if (dom.bairroClear) {
+            dom.bairroClear.addEventListener('click', () => {
+                if (dom.btnSomarBairro) dom.btnSomarBairro.style.display = 'none';
+            });
+        }
+
+        if (dom.btnSomarBairro) {
+            dom.btnSomarBairro.addEventListener('click', renderBairroSummary);
+        }
+    }
+
+    function renderBairroSummary() {
+        if (!state.currentBairro || !state.currentMunicipio) return;
+
+        const features = getAllFeatures().filter((f) =>
+            f.properties.municipio === state.currentMunicipio &&
+            f.properties.distrito === state.currentBairro
+        );
+
+        if (!features.length) return;
+
+        const cargoData = getCandidates()[state.currentCargo] || { candidates: {} };
+        const aggregated = {};
+
+        features.forEach((feature) => {
+            const votes = feature.properties[state.currentCargo] || {};
+            for (const code in votes) {
+                aggregated[code] = (aggregated[code] || 0) + (Number(votes[code]) || 0);
+            }
+        });
+
+        const entries = Object.entries(aggregated)
+            .map(([code, total]) => {
+                let info = cargoData.candidates[code] || { nome: `Candidato ${code}`, partido: '', cor: '#737373' };
+                let isInvalid = INVALID_CODES.has(code);
+
+                if (state.currentYear === '2000' && typeof MUNICIPIOS_2000 !== 'undefined') {
+                    const mun = state.currentMunicipio;
+                    if (mun && MUNICIPIOS_2000[mun]) {
+                        if (MUNICIPIOS_2000[mun][code]) {
+                            info = { ...info, nome: MUNICIPIOS_2000[mun][code].nome, partido: MUNICIPIOS_2000[mun][code].partido };
+                        } else if (code !== '95' && code !== '96') {
+                            isInvalid = true;
+                        }
+                    }
+                }
+
+                return { code, votos: total, info: { ...info, familia: info.familia || info.partido }, isInvalid };
+            })
+            .sort((a, b) => b.votos - a.votos);
+
+        const validEntries = entries.filter((e) => !e.isInvalid);
+        const invalidEntries = entries.filter((e) => e.isInvalid);
+        const validTotal = validEntries.reduce((s, e) => s + e.votos, 0);
+        const invalidTotal = invalidEntries.reduce((s, e) => s + e.votos, 0);
+        const total = validTotal + invalidTotal;
+        const winner = validEntries[0] || null;
+        const runnerUp = validEntries[1] || null;
+        const winnerPct = winner && validTotal > 0 ? (winner.votos / validTotal) * 100 : 0;
+        const marginVotes = winner ? winner.votos - (runnerUp?.votos || 0) : 0;
+        const marginPct = validTotal > 0 ? (marginVotes / validTotal) * 100 : 0;
+
+        const summary = { entries, validEntries, invalidEntries, validTotal, invalidTotal, total, winner, runnerUp, winnerPct, marginVotes, marginPct };
+        const props = { municipio: state.currentMunicipio, distrito: state.currentBairro };
+        const cargoLabel = getCandidates()[state.currentCargo]?.label || 'Cargo';
+        const bairroLabel = titleCase(state.currentBairro);
+        const munLabel = titleCase(state.currentMunicipio);
+
+        if (dom.placeholder) dom.placeholder.style.display = 'none';
+        if (dom.localInfo) dom.localInfo.style.display = 'block';
+        if (dom.localName) dom.localName.textContent = `${bairroLabel} â€” ${features.length} locais`;
+        if (dom.localMeta) {
+            dom.localMeta.innerHTML = [
+                `Municipio: ${escapeHtml(munLabel)}`,
+                `Distrito: ${escapeHtml(bairroLabel)}`,
+                `Soma de ${features.length} locais de votaÃ§Ã£o`
+            ].map((item) => `<span>${item}</span>`).join('');
+        }
+
+        renderMetrics(summary, props);
+        renderCandidateCards(summary, cargoLabel, { properties: props });
     }
 
     // ===== FIM BUSCA =====
 
     function resolveTurnoState() {
         const CIDADES_2T_2000 = ['DIADEMA', 'GUARULHOS', 'MAUA', 'MOGI DAS CRUZES', 'SAO PAULO'];
-        if (dom.selectCargo?.value === 'senador') {
+        const cargo = dom.selectCargo?.value;
+
+        // 1998: senador has no 2T; presidente was won in 1T (no 2T data)
+        if (state.currentYear === '1998') {
+            if (cargo === 'senador' || cargo === 'presidente') {
+                if (dom.selectTurno) { dom.selectTurno.disabled = true; dom.selectTurno.value = '_1t'; }
+                return '_1t';
+            }
+            if (dom.selectTurno) dom.selectTurno.disabled = false;
+            return dom.selectTurno?.value || '_1t';
+        }
+
+        if (cargo === 'senador') {
             if (dom.selectTurno) dom.selectTurno.disabled = true;
             return '';
         }
         if (state.currentYear === '2000' && state.currentMunicipio && !CIDADES_2T_2000.includes(state.currentMunicipio)) {
             if (dom.selectTurno) {
                 dom.selectTurno.disabled = true;
-                if (dom.selectTurno.value === '_2t') {
-                    dom.selectTurno.value = '_1t';
-                }
+                if (dom.selectTurno.value === '_2t') dom.selectTurno.value = '_1t';
             }
             return '_1t';
         }
@@ -1695,7 +1786,14 @@
 
         const cargo = dom.selectCargo?.value || 'presidente';
         const turno = resolveTurnoState();
-        const combined = cargo === 'senador' ? cargo : `${cargo}${turno}`;
+        let combined;
+        if (state.currentYear === '1998' && cargo === 'senador') {
+            combined = 'senador_1t';
+        } else if (cargo === 'senador') {
+            combined = 'senador';
+        } else {
+            combined = `${cargo}${turno}`;
+        }
         
         if (state.currentCargo !== combined) {
             state.currentCargo = combined;
@@ -1710,7 +1808,14 @@
             const cargo = dom.selectCargo?.value || 'presidente';
             const turno = resolveTurnoState();
 
-            const combined = `${cargo}${turno}`;
+            let combined;
+            if (state.currentYear === '1998' && cargo === 'senador') {
+                combined = 'senador_1t';
+            } else if (cargo === 'senador') {
+                combined = 'senador';
+            } else {
+                combined = `${cargo}${turno}`;
+            }
             if (state.currentCargo !== combined) {
                 state.currentCargo = combined;
                 state.perfFilterPct = 0;
@@ -1734,9 +1839,17 @@
             state.currentYear = year;
             dom.chipYear2002.classList.toggle('active', year === '2002');
             dom.chipYear2000.classList.toggle('active', year === '2000');
+            if (dom.chipYear1998) dom.chipYear1998.classList.toggle('active', year === '1998');
 
             if (year === '2000') {
                 dom.selectCargo.innerHTML = '<option value="prefeito" selected>Prefeito</option>';
+                dom.selectTurno.disabled = false;
+            } else if (year === '1998') {
+                dom.selectCargo.innerHTML = `
+                    <option value="presidente" selected>Presidente</option>
+                    <option value="governador">Governador SP</option>
+                    <option value="senador">Senador SP</option>
+                `;
             } else {
                 dom.selectCargo.innerHTML = `
                     <option value="presidente" selected>Presidente</option>
@@ -1751,8 +1864,10 @@
             state.selectedFeatureId = null;
             state.selectedFeature = null;
             state.selectedMarker = null;
-            dom.searchInput.value = '';
+            if (dom.searchInput) dom.searchInput.value = '';
             if (dom.searchClear) dom.searchClear.style.display = 'none';
+            if (dom.bairroInput) dom.bairroInput.value = '';
+            if (dom.bairroClear) dom.bairroClear.style.display = 'none';
             dom.selectTurno.value = '_1t';
             
             updateCargoState();
@@ -1761,6 +1876,7 @@
 
         if (dom.chipYear2002) dom.chipYear2002.addEventListener('click', () => updateYearSelection('2002'));
         if (dom.chipYear2000) dom.chipYear2000.addEventListener('click', () => updateYearSelection('2000'));
+        if (dom.chipYear1998) dom.chipYear1998.addEventListener('click', () => updateYearSelection('1998'));
 
         if (dom.selectMunicipio) {
             dom.selectMunicipio.addEventListener('change', () => {
@@ -1775,6 +1891,10 @@
                 if (dom.searchInput) {
                     dom.searchInput.value = '';
                     if (dom.searchClear) dom.searchClear.style.display = 'none';
+                }
+                if (dom.bairroInput) {
+                    dom.bairroInput.value = '';
+                    if (dom.bairroClear) dom.bairroClear.style.display = 'none';
                 }
 
                 applyMunicipioChange(dom.selectMunicipio.value);
@@ -2119,3 +2239,4 @@
         init();
     }
 })();
+

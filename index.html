@@ -41,6 +41,7 @@
                     <div class="chip-group">
                         <button class="chip-button active" id="chipYear2002">2002</button>
                         <button class="chip-button" id="chipYear2000">2000</button>
+                        <button class="chip-button" id="chipYear1998">1998</button>
                     </div>
                 </div>
 
@@ -63,15 +64,68 @@
                     </div>
                 </div>
 
-                <!-- Busca -->
+                <!-- Município (destaque, filtro principal) -->
+                <div style="
+                    margin: 0 0 8px 0;
+                    padding: 12px 14px 14px;
+                    border-radius: var(--radius);
+                    border: 1.5px solid var(--accent);
+                    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+                ">
+                    <h3 style="margin:0 0 8px; color:var(--accent); font-size:11px; letter-spacing:0.08em">MUNICÍPIO</h3>
+                    <select class="select" id="selectMunicipio" style="width:100%">
+                        <option value="">Todos os municípios</option>
+                    </select>
+                </div>
+
+                <!-- Busca de Bairro -->
+                <div class="section" style="position:relative; padding-bottom:0; margin-bottom:5px">
+                    <div style="display:flex; align-items:center; justify-content:space-between">
+                        <h3>Bairro / Distrito</h3>
+                        <button id="btnSomarBairro" type="button" style="
+                            display:none;
+                            font-size:11px; font-weight:700; letter-spacing:0.05em;
+                            padding:3px 10px; border-radius:20px; border:none; cursor:pointer;
+                            background:#2563eb; color:#fff;
+                        " title="Somar todos os locais deste bairro">SOMAR</button>
+                    </div>
+                    <div style="position:relative; width:100%">
+                        <input
+                            type="text"
+                            id="bairroInput"
+                            class="select search-icon"
+                            placeholder="Buscar bairro…"
+                            autocomplete="off"
+                            spellcheck="false"
+                            style="width:100%; padding-right:32px"
+                        />
+                        <span id="bairroClear" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--muted); font-size:16px; line-height:1; user-select:none">✕</span>
+                    </div>
+                    <div id="bairroDropdown" style="
+                        display:none;
+                        position:absolute;
+                        left:0; right:0;
+                        top:calc(100% + 4px);
+                        z-index:9999;
+                        background:var(--surface);
+                        border:1px solid var(--border);
+                        border-radius:var(--radius);
+                        box-shadow:0 8px 24px rgba(0,0,0,0.25);
+                        max-height:280px;
+                        overflow-y:auto;
+                        padding:4px 0;
+                    "></div>
+                </div>
+
+                <!-- Busca de Local de Votação -->
                 <div class="section" style="position:relative">
-                    <h3>Buscar local</h3>
+                    <h3>Local de Votação</h3>
                     <div style="position:relative">
                         <input
                             type="text"
                             id="searchInput"
                             class="select search-icon"
-                            placeholder="Escola, bairro ou município…"
+                            placeholder="Escola ou endereço…"
                             autocomplete="off"
                             spellcheck="false"
                             style="width:100%; padding-right:32px"
@@ -94,13 +148,6 @@
                     "></div>
                 </div>
 
-                <!-- Município -->
-                <div class="section">
-                    <h3>Município</h3>
-                    <select class="select" id="selectMunicipio">
-                        <option value="">Todos os municípios</option>
-                    </select>
-                </div>
 
                 <!-- Visualização do Mapa -->
                 <div class="section viz-section" id="vizSection">
