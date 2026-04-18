@@ -2,7 +2,7 @@
 
 Visualizador interativo dos resultados eleitorais na Região Metropolitana de São Paulo, cobrindo as eleições de 1994 a 2004.
 
-**🔗 [Acesse o site aqui](https://SEU-USUARIO.github.io/EL2002/)**
+**🔗 [Acesse o site aqui](https://secaoeleitoral.github.io/RM-SP-1994-2004/)**
 
 ## Funcionalidades
 
