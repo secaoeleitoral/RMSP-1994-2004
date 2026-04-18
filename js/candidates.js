@@ -825,14 +825,14 @@ const CANDIDATES_1994 = withColors({
     governador_1t: {
         label: 'Governador SP - 1º Turno (1994)',
         candidates: {
-            '12': { nome: 'Candidato PDT',    partido: 'PDT'   },
-            '13': { nome: 'José Genoíno',     partido: 'PT'    },
-            '15': { nome: 'Candidato PMDB',   partido: 'PMDB'  },
-            '20': { nome: 'Candidato PSC',    partido: 'PSC'   },
-            '36': { nome: 'Candidato PTC',    partido: 'PTC'   },
-            '39': { nome: 'Candidato PRN',    partido: 'PRN'   },
+            '12': { nome: 'Francisco Rossi',  partido: 'PDT'   },
+            '13': { nome: 'Zé Dirceu',        partido: 'PT'    },
+            '15': { nome: 'Barros Munhoz',    partido: 'PMDB'  },
+            '20': { nome: 'Eduardo Resstom',  partido: 'PSC'   },
+            '36': { nome: 'Ciro T. Moura',    partido: 'PRN'   },
+            '39': { nome: 'Medeiros',         partido: 'PP'    },
             '45': { nome: 'Mário Covas',      partido: 'PSDB'  },
-            '56': { nome: 'Candidato PRONA',  partido: 'PRONA' },
+            '56': { nome: 'Álvaro Dutra',     partido: 'PRONA' },
             '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
             '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
         }
@@ -840,7 +840,7 @@ const CANDIDATES_1994 = withColors({
     governador_2t: {
         label: 'Governador SP - 2º Turno (1994)',
         candidates: {
-            '12': { nome: 'Candidato PDT',    partido: 'PDT'   },
+            '12': { nome: 'Francisco Rossi',  partido: 'PDT'   },
             '45': { nome: 'Mário Covas',      partido: 'PSDB'  },
             '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
             '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
@@ -849,19 +849,19 @@ const CANDIDATES_1994 = withColors({
     senador_1t: {
         label: 'Senador SP - 1º Turno (1994)',
         candidates: {
-            '11': { nome: 'Candidato PP',     partido: 'PP'    },
-            '12': { nome: 'Candidato PDT',    partido: 'PDT'   },
-            '13': { nome: 'Eduardo Suplicy',  partido: 'PT'    },
-            '14': { nome: 'Candidato PTB',    partido: 'PTB'   },
-            '15': { nome: 'Candidato PMDB',   partido: 'PMDB'  },
-            '20': { nome: 'Candidato PSC',    partido: 'PSC'   },
-            '22': { nome: 'Candidato PL',     partido: 'PL'    },
-            '23': { nome: 'Candidato PPS',    partido: 'PPS'   },
-            '25': { nome: 'Candidato PFL',    partido: 'PFL'   },
-            '36': { nome: 'Candidato PTC',    partido: 'PTC'   },
-            '44': { nome: 'Candidato PRP',    partido: 'PRP'   },
-            '45': { nome: 'Candidato PSDB',   partido: 'PSDB'  },
-            '56': { nome: 'Candidato PRONA',  partido: 'PRONA' },
+            '11': { nome: 'Colasuonno',       partido: 'PPR'   },
+            '12': { nome: 'Carlos Caboclo',   partido: 'PDT'   },
+            '13': { nome: 'Luiza Erundina',   partido: 'PT'    },
+            '14': { nome: 'Brasil Vita',      partido: 'PTB'   },
+            '15': { nome: 'Machado',          partido: 'PMDB'  },
+            '20': { nome: 'Pompeu Toledo',    partido: 'PSC'   },
+            '22': { nome: 'Romeu Tuma',       partido: 'PL'    },
+            '23': { nome: 'João Herrmann',    partido: 'PPS'   },
+            '25': { nome: 'João Leite Neto',  partido: 'PFL'   },
+            '36': { nome: 'José Prego',       partido: 'PRN'   },
+            '44': { nome: 'Elias Jorge',      partido: 'PRP'   },
+            '45': { nome: 'José Serra',       partido: 'PSDB'  },
+            '56': { nome: 'Dr. Paulo Flores', partido: 'PRONA' },
             '95': { nome: 'Brancos', partido: '', familia: 'ALT_CINZA' },
             '96': { nome: 'Nulos',   partido: '', familia: 'ALT_CINZA' }
         }
