@@ -1,5 +1,5 @@
 /**
- * Dicionario de candidatos e escalas partidarias - Eleicoes 2002 RMSP
+ * Dicionario de candidatos e escalas partidarias - Secao Eleitoral RMSP 1994-2004
  * As escalas foram adaptadas da planilha de referencia enviada pelo usuario.
  */
 

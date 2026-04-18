@@ -1,6 +1,6 @@
-# 🗳️ Eleições 2002 — Região Metropolitana de São Paulo
+# 🗳️ Seção Eleitoral — RMSP 1994–2004
 
-Visualizador interativo dos resultados eleitorais de 2002 na Região Metropolitana de São Paulo, com mapa por local de votação.
+Visualizador interativo dos resultados eleitorais na Região Metropolitana de São Paulo, cobrindo as eleições de 1994 a 2004.
 
 **🔗 [Acesse o site aqui](https://SEU-USUARIO.github.io/EL2002/)**
 

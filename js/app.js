@@ -1,5 +1,5 @@
 /**
- * Visualizador Eleitoral 2002 - RMSP
+ * Seção Eleitoral - RMSP 1994-2004
  * Main application logic for the redesigned layout.
  */
 
@@ -112,7 +112,7 @@
 
     function getInitialTheme() {
         try {
-            const stored = window.localStorage.getItem('el2002-theme');
+            const stored = window.localStorage.getItem('secao-eleitoral-theme');
             if (stored === 'light' || stored === 'dark') {
                 return stored;
             }
@@ -2314,7 +2314,7 @@
         document.documentElement.dataset.theme = state.theme;
 
         try {
-            window.localStorage.setItem('el2002-theme', state.theme);
+            window.localStorage.setItem('secao-eleitoral-theme', state.theme);
         } catch (error) {
             // Ignore persistence errors.
         }
