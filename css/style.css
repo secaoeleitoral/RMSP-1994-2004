@@ -125,6 +125,14 @@ body {
     background: var(--surface-2);
     width: 28px;
 }
+
+/* Explicit visibility state for expand buttons */
+.expand-tab.visible {
+    display: flex !important;
+}
+.expand-tab.hidden {
+    display: none !important;
+}
 #expandLeft {
     left: 0;
     border-radius: 0 var(--radius) var(--radius) 0;
@@ -802,34 +810,39 @@ body {
 }
 
 @media (max-width: 768px) {
-    /* Colapsar painel esquerdo por padrão */
-    #panelLeft.collapsed {
-        transform: translateX(-100%) !important;
-    }
-
-    /* Expandir botão sempre visível e clicável */
-    #expandLeft {
-        display: flex !important;
-        pointer-events: auto !important;
-        cursor: pointer !important;
-        z-index: 200 !important;
-    }
-
-    /* Expandir botões para mobile */
+    /* Expand button sempre grande e clicável */
     .expand-tab {
-        width: 44px !important;
+        width: 48px !important;
         height: 80px !important;
         font-size: 18px !important;
         z-index: 200 !important;
+        background: var(--surface) !important;
+        border: 2px solid var(--accent) !important;
+        cursor: pointer !important;
         pointer-events: auto !important;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
     }
+
     .expand-tab:hover {
-        width: 48px !important;
         background: var(--accent) !important;
         color: white !important;
+        width: 52px !important;
     }
-    #expandLeft, #expandRight {
+
+    .expand-tab:active,
+    .expand-tab:focus {
+        background: var(--accent) !important;
+        color: white !important;
+        transform: translateY(-50%) scale(0.95);
+        outline: none;
+    }
+
+    /* Ensure expand button is visible when needed */
+    .expand-tab.visible {
         display: flex !important;
+        pointer-events: auto !important;
     }
 
     /* Chips menores para caber em 1 linha */

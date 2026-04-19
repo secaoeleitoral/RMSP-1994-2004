@@ -2243,15 +2243,29 @@
         }
 
         if (dom.expandLeft) {
-            dom.expandLeft.addEventListener('click', () => {
+            const expandLeftHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('expandLeft triggered');
                 setPanelCollapsed(dom.panelLeft, false);
-            });
+            };
+            dom.expandLeft.addEventListener('click', expandLeftHandler);
+            dom.expandLeft.addEventListener('touchstart', expandLeftHandler);
+        } else {
+            console.warn('expandLeft element not found');
         }
 
         if (dom.expandRight) {
-            dom.expandRight.addEventListener('click', () => {
+            const expandRightHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('expandRight triggered');
                 setPanelCollapsed(dom.panelRight, false);
-            });
+            };
+            dom.expandRight.addEventListener('click', expandRightHandler);
+            dom.expandRight.addEventListener('touchstart', expandRightHandler);
+        } else {
+            console.warn('expandRight element not found');
         }
 
         if (dom.btnVerMais) {
@@ -2331,6 +2345,26 @@
         }
 
         panel.classList.toggle('collapsed', collapsed);
+
+        // Explicitly manage expand button visibility
+        if (panel === dom.panelLeft) {
+            if (collapsed && dom.expandLeft) {
+                dom.expandLeft.classList.add('visible');
+                dom.expandLeft.classList.remove('hidden');
+            } else if (dom.expandLeft) {
+                dom.expandLeft.classList.add('hidden');
+                dom.expandLeft.classList.remove('visible');
+            }
+        } else if (panel === dom.panelRight) {
+            if (collapsed && dom.expandRight) {
+                dom.expandRight.classList.add('visible');
+                dom.expandRight.classList.remove('hidden');
+            } else if (dom.expandRight) {
+                dom.expandRight.classList.add('hidden');
+                dom.expandRight.classList.remove('visible');
+            }
+        }
+
         window.setTimeout(() => {
             state.map?.invalidateSize();
         }, 320);
@@ -2432,19 +2466,27 @@
 
     function initMobileOptimizations() {
         // Auto-colapsar painel esquerdo em mobile
-        if (window.innerWidth <= 768) {
-            setPanelCollapsed(dom.panelLeft, true);
-        }
-
-        // Reajustar ao redimensionar
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768 && !dom.panelLeft?.classList.contains('collapsed')) {
-                // Manter painel aberto se usuário expandiu manualmente em mobile
-            } else if (window.innerWidth > 768 && dom.panelLeft?.classList.contains('collapsed')) {
-                // Auto-abrir em desktop se estava fechado
-                setPanelCollapsed(dom.panelLeft, false);
+        setTimeout(() => {
+            if (window.innerWidth <= 768) {
+                if (dom.panelLeft) {
+                    dom.panelLeft.classList.add('collapsed');
+                    // Mostrar o botão de expansão
+                    if (dom.expandLeft) {
+                        dom.expandLeft.classList.add('visible');
+                        dom.expandLeft.classList.remove('hidden');
+                        console.log('expandLeft button made visible');
+                    }
+                }
+                if (dom.panelRight) {
+                    // Keep right panel expanded on mobile
+                    dom.panelRight.classList.remove('collapsed');
+                    if (dom.expandRight) {
+                        dom.expandRight.classList.add('hidden');
+                        dom.expandRight.classList.remove('visible');
+                    }
+                }
             }
-        });
+        }, 100);
     }
 
     function init() {
