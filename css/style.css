@@ -801,23 +801,111 @@ body {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    /* Colapsar painel esquerdo por padrão */
+    #panelLeft {
+        transform: translateX(-100%) !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        opacity: 0;
+        pointer-events: none;
+    }
+    #expandLeft { display: flex !important; }
+
+    /* Expandir botões para mobile */
+    .expand-tab {
+        width: 32px;
+        height: 72px;
+        font-size: 16px;
+    }
+    .expand-tab:hover { width: 36px; }
+
+    /* Chips menores para caber em 1 linha */
+    .chip-button {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    /* Selects e inputs comprimidos */
+    .select {
+        padding: 6px 8px;
+        font-size: 12px;
+        height: 36px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="search"] {
+        padding: 6px 8px;
+        font-size: 12px;
+        height: 36px;
+    }
+
+    /* Painéis com altura reduzida */
     .side {
         width: calc(100vw - 16px);
         left: 8px;
         right: 8px;
         top: 8px;
         bottom: 8px;
+        border-radius: 12px;
     }
+
     .side-left {
         bottom: auto;
-        max-height: 45vh;
+        max-height: 55vh;
     }
+
     .side-right {
         top: auto;
-        max-height: 50vh;
+        max-height: 45vh;
     }
+
+    /* Grid em 1 coluna */
     .grid { grid-template-columns: 1fr; }
+
+    /* Reduzir padding nas seções */
+    .section {
+        margin-bottom: 8px !important;
+        padding: 8px 12px !important;
+    }
+
+    .head {
+        padding: 8px 10px;
+    }
+
+    /* Reduzir fonte do corpo */
+    body { font-size: 13px; }
+
+    /* Botões com toque mais fácil (48px mínimo) */
+    button, .chip-button, .select {
+        min-height: 44px;
+    }
+
+    /* Aumentar tap targets */
+    .collapse-btn, .theme-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+    /* Dropdown overflow para mobile */
+    #bairroDropdown, #searchDropdown {
+        max-height: 200px !important;
+    }
+
+    /* Melhorar rowgap entre seções */
+    .section + .section {
+        margin-top: 4px;
+    }
+
+    /* Diminuir altura do header */
+    .head {
+        min-height: 36px;
+    }
+
+    /* Melhor spacing nos menus */
+    .row { gap: 4px; }
 }
 
 /* ===== ANIMAÇÕES ===== */

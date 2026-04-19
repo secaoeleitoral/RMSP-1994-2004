@@ -2430,6 +2430,23 @@
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
 
+    function initMobileOptimizations() {
+        // Auto-colapsar painel esquerdo em mobile
+        if (window.innerWidth <= 768) {
+            setPanelCollapsed(dom.panelLeft, true);
+        }
+
+        // Reajustar ao redimensionar
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768 && !dom.panelLeft?.classList.contains('collapsed')) {
+                // Manter painel aberto se usuário expandiu manualmente em mobile
+            } else if (window.innerWidth > 768 && dom.panelLeft?.classList.contains('collapsed')) {
+                // Auto-abrir em desktop se estava fechado
+                setPanelCollapsed(dom.panelLeft, false);
+            }
+        });
+    }
+
     function init() {
         if (dom.selectCargo && dom.selectTurno) {
             const cargo = dom.selectCargo.value;
@@ -2457,6 +2474,7 @@
         populatePerfCandidates();
         populateVencidosCandidates();
         loadData();
+        initMobileOptimizations();
     }
 
     if (document.readyState === 'loading') {
