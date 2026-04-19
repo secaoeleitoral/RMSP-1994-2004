@@ -1385,7 +1385,7 @@
 
         if (dom.localMeta) {
             dom.localMeta.innerHTML = [
-                `Municipio: ${escapeHtml(titleCase(props.municipio))}`,
+                `Município: ${escapeHtml(titleCase(props.municipio))}`,
                 `Distrito: ${escapeHtml(titleCase(props.distrito || props.municipio))}`,
                 `Zona ${escapeHtml(String(props.zona))} - ${escapeHtml(titleCase(props.zona_nome || props.municipio))}`,
                 `${escapeHtml(props.tipo || 'Local')} - ${escapeHtml(titleCase(props.endereco || 'Endereco nao informado'))}`
